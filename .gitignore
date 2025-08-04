@@ -35,7 +35,6 @@ logs/
 *.log
 
 # 設定ファイル（機密情報を含む可能性）
-config/*.ini
 config/*.conf
 
 # モデルファイル
