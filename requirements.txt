@@ -1,7 +1,9 @@
 # FuguMT翻訳サーバー 依存関係
 
 # 深層学習フレームワーク
-torch>=1.12.0
+# PyTorch (GPU/CPU はsetup.batで選択)
+# torch, torchvision, torchaudio は setup.bat で自動インストール
+
 transformers>=4.21.0
 
 # WebSocket通信

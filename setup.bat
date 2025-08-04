@@ -62,7 +62,24 @@ python -m pip install --upgrade pip setuptools wheel
 if %errorlevel% neq 0 (
     echo [WARNING] Failed to upgrade pip, continuing with current version...
 )
-pip install -r requirements.txt
+
+echo.
+echo GPU support? (y/n)
+set /p GPU="Choice: "
+if /i "%GPU%"=="y" (
+    echo Installing PyTorch with CUDA...
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    if errorlevel 1 (
+        echo CUDA installation failed, trying CPU version...
+        pip install torch torchvision torchaudio
+    )
+) else (
+    echo Installing CPU version...
+    pip install torch torchvision torchaudio
+)
+
+echo Installing other dependencies...
+pip install -r requirements.txt --no-deps transformers websockets sentencepiece protobuf sacremoses typing-extensions psutil
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install dependencies.
     echo [HINT] Please check your internet connection.
@@ -86,8 +103,8 @@ if not exist config\fugumt_translator.ini (
         echo max_connections = 10
         echo.
         echo [TRANSLATION]
-        echo model_name = facebook/nllb-200-distilled-1.3B
-        echo device = cpu
+        echo model_name = staka/fugumt-en-ja
+        echo device = cuda
         echo max_length = 128
         echo.
         echo [LOGGING]

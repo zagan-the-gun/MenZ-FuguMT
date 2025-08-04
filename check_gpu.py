@@ -194,8 +194,7 @@ def run_comprehensive_test():
         print("   [SUCCESS] Configuration created")
         
         print("   Initializing translation engine...")
-        # Note: This takes time and uses significant memory
-        print("   (This process may take some time...)")
+        print("   (Loading models... please wait)")
         
         # Force CPU mode to avoid CUDA errors
         import torch
