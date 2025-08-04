@@ -1,0 +1,42 @@
+# FuguMT翻訳サーバー 依存関係
+
+# 深層学習フレームワーク
+torch>=1.12.0
+transformers>=4.21.0
+
+# WebSocket通信
+websockets>=10.3
+
+# 設定ファイル管理・ユーティリティ
+pathlib2; python_version < "3.4"
+
+# ログ管理（標準ライブラリのため削除）
+# logging
+
+# 非同期処理（標準ライブラリのため削除）
+# asyncio
+
+# JSON処理（標準ライブラリだが明示的に記載）
+# json
+
+# 型ヒント
+typing-extensions>=4.0.0
+
+# トークナイザー関連
+sentencepiece>=0.1.95
+protobuf>=3.20.0
+
+# その他ユーティリティ（標準ライブラリのため削除）
+# uuid
+
+# 開発・テスト用（オプション）
+# pytest>=7.0.0
+# pytest-asyncio>=0.19.0
+
+# GPU支援（オプション）
+# torch-audio  # 必要に応じて
+# torchvision  # 必要に応じて
+
+# 性能監視（オプション）
+# psutil  # メモリ・CPU使用率監視
+# nvidia-ml-py3  # GPU使用率監視（NVIDIA GPU使用時）
