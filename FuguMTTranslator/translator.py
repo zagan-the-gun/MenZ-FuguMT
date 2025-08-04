@@ -29,6 +29,13 @@ class FuguMTTranslator:
         self.device = self._setup_device()
         self.logger.info(f"使用デバイス: {self.device}")
         
+        # FP16設定
+        self.use_fp16 = self.config.use_fp16 and self.device != 'cpu'
+        if self.use_fp16:
+            self.logger.info("FP16モードを有効にしました")
+        else:
+            self.logger.info("FP32モードを使用します")
+        
         # モデルとトークナイザーの初期化
         self.models = {}
         self.tokenizers = {}
@@ -131,9 +138,16 @@ class FuguMTTranslator:
                 self.tokenizers['en-ja'] = MarianTokenizer.from_pretrained(
                     self.config.model_name_en_ja
                 )
-                self.models['en-ja'] = MarianMTModel.from_pretrained(
+                model = MarianMTModel.from_pretrained(
                     self.config.model_name_en_ja
                 ).to(self.device)
+                
+                # FP16モードの適用
+                if self.use_fp16:
+                    model = model.half()
+                    self.logger.info("英日モデルをFP16モードに設定しました")
+                
+                self.models['en-ja'] = model
                 self.models['en-ja'].eval()
                 
             # 日英翻訳モデル（存在する場合）
@@ -143,9 +157,16 @@ class FuguMTTranslator:
                     self.tokenizers['ja-en'] = MarianTokenizer.from_pretrained(
                         self.config.model_name_ja_en
                     )
-                    self.models['ja-en'] = MarianMTModel.from_pretrained(
+                    model = MarianMTModel.from_pretrained(
                         self.config.model_name_ja_en
                     ).to(self.device)
+                    
+                    # FP16モードの適用
+                    if self.use_fp16:
+                        model = model.half()
+                        self.logger.info("日英モデルをFP16モードに設定しました")
+                    
+                    self.models['ja-en'] = model
                     self.models['ja-en'].eval()
                 except Exception as e:
                     self.logger.warning(f"日英モデルの読み込みに失敗: {e}")
@@ -193,6 +214,10 @@ class FuguMTTranslator:
                 truncation=True,
                 padding=True
             ).to(self.device)
+            
+            # FP16モードの場合、入力も半精度に変換
+            if self.use_fp16:
+                inputs = {k: v.half() if v.dtype == torch.float32 else v for k, v in inputs.items()}
             
             # 翻訳実行
             with torch.no_grad():
@@ -276,6 +301,7 @@ class FuguMTTranslator:
                 'models_loaded': len(self.models),
                 'supported_pairs': self.get_supported_languages(),
                 'device': self.device,
+                'fp16_mode': self.use_fp16,
                 'test_translation': test_result.get('status') == 'success'
             }
         except Exception as e:
@@ -283,5 +309,6 @@ class FuguMTTranslator:
                 'status': 'unhealthy',
                 'error': str(e),
                 'models_loaded': len(self.models),
-                'device': self.device
+                'device': self.device,
+                'fp16_mode': self.use_fp16
             }

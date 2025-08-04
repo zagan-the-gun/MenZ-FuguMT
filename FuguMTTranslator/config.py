@@ -54,7 +54,8 @@ class Config:
             'max_length': '512',
             'num_beams': '4',
             'temperature': '1.0',
-            'use_cache': 'true'
+            'use_cache': 'true',
+            'use_fp16': 'false'  # FP16（半精度浮動小数点）モード
         }
         
         self.config['LOGGING'] = {
@@ -142,6 +143,10 @@ class Config:
     @property
     def use_cache(self):
         return self.getboolean('TRANSLATION', 'use_cache', True)
+        
+    @property
+    def use_fp16(self):
+        return self.getboolean('TRANSLATION', 'use_fp16', False)
         
     @property
     def log_level(self):
