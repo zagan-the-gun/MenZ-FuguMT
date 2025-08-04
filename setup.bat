@@ -68,18 +68,18 @@ echo GPU support? (y/n)
 set /p GPU="Choice: "
 if /i "%GPU%"=="y" (
     echo Installing PyTorch with CUDA...
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --index-url https://download.pytorch.org/whl/cu121
     if errorlevel 1 (
         echo CUDA installation failed, trying CPU version...
-        pip install torch torchvision torchaudio
+        pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0"
     )
 ) else (
     echo Installing CPU version...
-    pip install torch torchvision torchaudio
+    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0"
 )
 
 echo Installing other dependencies...
-pip install -r requirements.txt --no-deps transformers websockets sentencepiece protobuf sacremoses typing-extensions psutil
+pip install -r requirements.txt
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install dependencies.
     echo [HINT] Please check your internet connection.
