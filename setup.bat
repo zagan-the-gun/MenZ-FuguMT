@@ -58,7 +58,10 @@ echo.
 
 echo [4/6] Installing dependencies...
 echo [INFO] This may take several minutes...
-pip install --upgrade pip
+python -m pip install --upgrade pip setuptools wheel
+if %errorlevel% neq 0 (
+    echo [WARNING] Failed to upgrade pip, continuing with current version...
+)
 pip install -r requirements.txt
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install dependencies.

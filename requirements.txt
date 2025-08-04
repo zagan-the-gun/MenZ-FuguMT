@@ -8,7 +8,7 @@ transformers>=4.21.0
 websockets>=10.3
 
 # 設定ファイル管理・ユーティリティ
-pathlib2; python_version < "3.4"
+# pathlib2; python_version < "3.4"  # Python 3.4以降では標準ライブラリpathlib使用
 
 # ログ管理（標準ライブラリのため削除）
 # logging
@@ -25,6 +25,10 @@ typing-extensions>=4.0.0
 # トークナイザー関連
 sentencepiece>=0.1.95
 protobuf>=3.20.0
+sacremoses>=0.0.43
+
+# ダウンロード高速化（オプション）
+# hf_xet  # Xetストレージサポート（大きなモデル用）
 
 # その他ユーティリティ（標準ライブラリのため削除）
 # uuid
@@ -38,5 +42,5 @@ protobuf>=3.20.0
 # torchvision  # 必要に応じて
 
 # 性能監視（オプション）
-# psutil  # メモリ・CPU使用率監視
+psutil>=5.8.0
 # nvidia-ml-py3  # GPU使用率監視（NVIDIA GPU使用時）
