@@ -66,22 +66,29 @@ if %errorlevel% neq 0 (
 echo.
 echo GPU support? (y/n)
 set /p GPU="Choice: "
-if /i "%GPU%"=="y" (
-    echo Installing PyTorch with CUDA...
-    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --index-url https://download.pytorch.org/whl/cu121
-    if errorlevel 1 (
-        echo CUDA installation failed, trying CPU version...
-        pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0"
-    )
-) else (
-    echo Installing CPU version...
-    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0"
-)
-
 echo Installing other dependencies...
 pip install -r requirements.txt
 if %errorlevel% neq 0 (
     echo [ERROR] Failed to install dependencies.
+    echo [HINT] Please check your internet connection.
+    pause
+    exit /b 1
+)
+
+if /i "%GPU%"=="y" (
+    echo Installing PyTorch with CUDA (final)...
+    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --index-url https://download.pytorch.org/whl/cu121 --force-reinstall --no-deps
+    if errorlevel 1 (
+        echo CUDA installation failed, trying CPU version...
+        pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --force-reinstall --no-deps
+    )
+) else (
+    echo Installing CPU version (final)...
+    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --force-reinstall --no-deps
+)
+
+if %errorlevel% neq 0 (
+    echo [ERROR] Failed to install PyTorch.
     echo [HINT] Please check your internet connection.
     pause
     exit /b 1
