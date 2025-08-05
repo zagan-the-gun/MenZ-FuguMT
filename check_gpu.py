@@ -49,11 +49,12 @@ def check_pytorch():
                     print(f"      Memory: {gpu_memory:.1f}GB (Used: {cached:.1f}GB, Free: {free:.1f}GB)")
                     print(f"      Compute Capability: {compute_capability}")
                     print(f"      Config: device = cuda, gpu_id = {i}")
-                except Exception:
+                except (RuntimeError, OSError) as e:
                     print(f"   GPU {i}: {gpu_name}")
                     print(f"      Memory: {gpu_memory:.1f}GB")
                     print(f"      Compute Capability: {compute_capability}")
                     print(f"      Config: device = cuda, gpu_id = {i}")
+                    print(f"      [WARNING] Could not get memory usage: {e}")
                 print()
             
             if gpu_count > 1:
@@ -134,6 +135,12 @@ def check_fugumt_model():
         translated = tokenizer.decode(outputs[0], skip_special_tokens=True)
         print(f"   Test translation: 'Hello world' -> '{translated}'")
         print("   [SUCCESS] Translation test completed")
+        
+        # Clean up memory
+        del model, tokenizer, inputs, outputs
+        import gc
+        gc.collect()
+        print("   Memory cleaned up")
         print()
         
     except Exception as e:
@@ -176,8 +183,8 @@ def check_system_resources():
         print()
         
     except ImportError:
-        print("   psutil not installed (optional)")
-        print("   Install with: pip install psutil for detailed info")
+        print("   [ERROR] psutil not available")
+        print("   Install with: pip install psutil")
         print()
 
 
@@ -199,9 +206,12 @@ def run_comprehensive_test():
         # Force CPU mode to avoid CUDA errors
         import torch
         if not torch.cuda.is_available():
-            # Update config file directly instead of property
+            # Note: Config class doesn't provide setter methods, 
+            # so we temporarily override the device for this test
+            # The actual config file remains unchanged
+            original_device = config.device
             config.config.set('TRANSLATION', 'device', 'cpu')
-            print("   [INFO] CUDA not available, using CPU mode")
+            print("   [INFO] CUDA not available, using CPU mode for test")
         
         translator = FuguMTTranslator(config)
         print("   [SUCCESS] Translation engine initialized")
@@ -224,14 +234,22 @@ def run_comprehensive_test():
                 allocated = torch.cuda.memory_allocated(gpu_id) / (1024**3)
                 print(f"   GPU details: {gpu_name} (ID: {gpu_id})")
                 print(f"   GPU memory: {gpu_memory:.1f}GB (Currently used: {allocated:.1f}GB)")
-            except Exception:
+            except (RuntimeError, OSError):
                 print(f"   GPU details: {gpu_name} (ID: {gpu_id}, Memory: {gpu_memory:.1f}GB)")
         
         print("   [SUCCESS] Comprehensive test completed")
         print()
         
+    except (ModuleNotFoundError, ImportError) as e:
+        print(f"   [ERROR] Module import failed: {e}")
+        print("   Run setup.py to install required dependencies")
+        print()
+    except (RuntimeError, OSError) as e:
+        print(f"   [ERROR] Runtime error: {e}")
+        print("   Check system resources and configuration")
+        print()
     except Exception as e:
-        print(f"   [ERROR] Comprehensive test failed: {e}")
+        print(f"   [ERROR] Unexpected error: {e}")
         print("   Run setup.py to complete the setup")
         print()
 
