@@ -45,4 +45,3 @@ sacremoses>=0.0.43
 
 # 性能監視（オプション）
 psutil>=5.8.0
-nvidia-ml-py3>=12.0.0  # GPU使用率監視（NVIDIA GPU使用時）
