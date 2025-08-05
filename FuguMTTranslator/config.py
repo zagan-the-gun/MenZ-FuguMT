@@ -66,7 +66,6 @@ class Config:
         }
         
         self.config['PERFORMANCE'] = {
-            'batch_size': '1',
             'timeout_seconds': '30.0',
             'worker_threads': '4'
         }
@@ -155,10 +154,6 @@ class Config:
     @property
     def log_file(self):
         return self.get('LOGGING', 'file', 'logs/fugumt_translator.log')
-        
-    @property
-    def batch_size(self):
-        return self.getint('PERFORMANCE', 'batch_size', 1)
         
     @property
     def timeout_seconds(self):
