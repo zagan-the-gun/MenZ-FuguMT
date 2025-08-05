@@ -111,8 +111,13 @@ echo.
 echo ======================================================
 echo FuguMT Translation Server Starting...
 echo ======================================================
-echo Port: 55002
-echo URL: ws://127.0.0.1:55002
+
+:: Read port from config file
+for /f "tokens=2 delims== " %%i in ('findstr "^port" config\fugumt_translator.ini') do set CONFIG_PORT=%%i
+for /f "tokens=2 delims== " %%i in ('findstr "^host" config\fugumt_translator.ini') do set CONFIG_HOST=%%i
+
+echo Port: %CONFIG_PORT%
+echo URL: ws://%CONFIG_HOST%:%CONFIG_PORT%
 echo Stop: Ctrl + C
 echo ======================================================
 echo.

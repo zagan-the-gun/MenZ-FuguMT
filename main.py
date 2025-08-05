@@ -226,7 +226,7 @@ class FuguMTServer:
         print("="*60)
         print("💡 使用方法:")
         print("   WebSocketクライアントで接続してください")
-        print("   例: ws://127.0.0.1:55002")
+        print(f"   例: ws://{self.config.server_host}:{self.config.server_port}")
         print()
         print("📋 メッセージフォーマット:")
         print('   {"type": "translation", "text": "Hello", "source_lang": "en", "target_lang": "ja"}')
