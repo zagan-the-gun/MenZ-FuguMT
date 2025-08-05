@@ -5,8 +5,8 @@
 
 :: Immediate pause to catch any early errors
 echo Starting FuguMT Translation Server...
-echo Press any key to continue startup checks...
-pause >nul
+REM echo Press any key to continue startup checks...
+REM pause >nul
 
 echo.
 echo ======================================================
@@ -123,7 +123,7 @@ echo.
 :: Start server with detailed error handling
 echo [CRITICAL] About to start Python server...
 echo Press any key to launch the server (if error occurs, window will stay open)
-pause >nul
+REM pause >nul
 
 python -u main.py 2>&1
 set EXIT_CODE=%ERRORLEVEL%
@@ -168,6 +168,6 @@ echo ======================================================
 deactivate
 
 echo.
-echo Press any key to close...
-pause
+REM echo Press any key to close...
+REM pause
 exit /b %EXIT_CODE%

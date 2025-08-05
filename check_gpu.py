@@ -199,7 +199,8 @@ def run_comprehensive_test():
         # Force CPU mode to avoid CUDA errors
         import torch
         if not torch.cuda.is_available():
-            config.device = 'cpu'
+            # Update config file directly instead of property
+            config.config.set('TRANSLATION', 'device', 'cpu')
             print("   [INFO] CUDA not available, using CPU mode")
         
         translator = FuguMTTranslator(config)

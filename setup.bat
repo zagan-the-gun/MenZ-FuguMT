@@ -1,6 +1,6 @@
 @echo off
 title FuguMT Translation Server - Setup
-setlocal
+setlocal EnableDelayedExpansion
 
 :: Create setup log
 set SETUP_LOG=setup_log_%date:~0,4%%date:~5,2%%date:~8,2%_%time:~0,2%%time:~3,2%%time:~6,2%.txt
@@ -88,63 +88,59 @@ if %errorlevel% neq 0 (
     echo [WARNING] Failed to upgrade pip, continuing with current version...
 )
 
-echo.
-echo GPU support? (y/n)
-echo [STEP] Asking user for GPU choice... >> %SETUP_LOG%
-set /p GPU="Choice: "
-echo [INPUT] User selected: %GPU% >> %SETUP_LOG%
-echo Installing other dependencies...
+echo Installing dependencies...
 echo [STEP] Installing dependencies from requirements.txt... >> %SETUP_LOG%
 pip install -r requirements.txt >> %SETUP_LOG% 2>&1
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     echo [ERROR] Failed to install dependencies.
-    echo [HINT] Please check your internet connection.
     echo [ERROR] Dependencies installation failed >> %SETUP_LOG%
     echo [ERROR] Setup failed. See log file: %SETUP_LOG%
     echo Setup failed at %date% %time% >> %SETUP_LOG%
     exit /b 1
+) else (
+    echo [SUCCESS] Dependencies installed >> %SETUP_LOG%
+    echo [SUCCESS] Dependencies installed
 )
-echo [SUCCESS] Dependencies installed >> %SETUP_LOG%
+
+echo.
+echo GPU support? (y/n)
+set /p GPU="Choice: "
+echo [INPUT] User selected: %GPU% >> %SETUP_LOG%
 
 if /i "%GPU%"=="y" (
-    echo Installing PyTorch with CUDA (final)...
+    echo Installing PyTorch with CUDA...
     echo [STEP] Installing PyTorch CUDA version... >> %SETUP_LOG%
-    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --index-url https://download.pytorch.org/whl/cu121 --force-reinstall --no-deps >> %SETUP_LOG% 2>&1
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --force-reinstall >> %SETUP_LOG% 2>&1
     if errorlevel 1 (
-        echo CUDA installation failed, trying CPU version...
-        echo [WARNING] CUDA PyTorch failed, trying CPU version >> %SETUP_LOG%
-        pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --force-reinstall --no-deps >> %SETUP_LOG% 2>&1
-        if errorlevel 1 (
-            echo [ERROR] CPU PyTorch installation also failed
-            echo [ERROR] Both CUDA and CPU PyTorch installation failed >> %SETUP_LOG%
-            goto :pytorch_error
-        )
-        echo [SUCCESS] CPU PyTorch installed as fallback >> %SETUP_LOG%
-    ) else (
-        echo [SUCCESS] CUDA PyTorch installed >> %SETUP_LOG%
+        echo [ERROR] Failed to install PyTorch.
+        echo [ERROR] PyTorch installation failed >> %SETUP_LOG%
+        echo [ERROR] Setup failed. See log file: %SETUP_LOG%
+        echo Setup failed at %date% %time% >> %SETUP_LOG%
+        exit /b 1
     )
+    echo [SUCCESS] PyTorch CUDA version installed >> %SETUP_LOG%
+    echo [SUCCESS] PyTorch CUDA version installed
 ) else (
-    echo Installing CPU version (final)...
+    echo Installing PyTorch CPU version...
     echo [STEP] Installing PyTorch CPU version... >> %SETUP_LOG%
-    pip install "torch>=2.6.0" "torchvision>=0.19.0" "torchaudio>=2.6.0" --force-reinstall --no-deps >> %SETUP_LOG% 2>&1
+    pip install torch torchvision torchaudio --force-reinstall >> %SETUP_LOG% 2>&1
     if errorlevel 1 (
-        echo [ERROR] CPU PyTorch installation failed
-        echo [ERROR] CPU PyTorch installation failed >> %SETUP_LOG%
-        goto :pytorch_error
+        echo [ERROR] Failed to install PyTorch CPU version.
+        echo [ERROR] PyTorch installation failed >> %SETUP_LOG%
+        echo [ERROR] Setup failed. See log file: %SETUP_LOG%
+        echo Setup failed at %date% %time% >> %SETUP_LOG%
+        exit /b 1
     )
-    echo [SUCCESS] CPU PyTorch installed >> %SETUP_LOG%
+    echo [SUCCESS] PyTorch installation completed >> %SETUP_LOG%
+    echo [SUCCESS] PyTorch CPU version installed
 )
 
-goto :pytorch_success
+:: Verify PyTorch version
+echo [INFO] Verifying PyTorch installation...
+python -c "import torch; print(f'[INFO] PyTorch {torch.__version__} installed successfully')"
+python -c "import torch; print(f'[INFO] CUDA available: {torch.cuda.is_available()}')" 2>nul
 
-:pytorch_error
-echo [ERROR] Failed to install PyTorch.
-echo [HINT] Please check your internet connection and CUDA compatibility.
-echo [ERROR] Setup failed. See log file: %SETUP_LOG%
-echo Setup failed at %date% %time% >> %SETUP_LOG%
-exit /b 1
-
-:pytorch_success
+echo [SUCCESS] Setup completed >> %SETUP_LOG%
 echo.
 
 echo [5/6] Creating necessary directories...
@@ -155,6 +151,14 @@ echo.
 echo [6/6] Creating configuration file...
 if not exist config\fugumt_translator.ini (
     echo [INFO] Creating default configuration file...
+    
+    :: Detect PyTorch device capability
+    python -c "import torch; print('cuda' if torch.cuda.is_available() else 'cpu')" > temp_device.txt 2>nul
+    set /p TORCH_DEVICE=<temp_device.txt
+    del temp_device.txt 2>nul
+    if "%TORCH_DEVICE%"=="" set TORCH_DEVICE=cpu
+    
+    echo [INFO] Configuring for device: %TORCH_DEVICE%
     (
         echo [SERVER]
         echo host = 127.0.0.1
@@ -163,7 +167,7 @@ if not exist config\fugumt_translator.ini (
         echo.
         echo [TRANSLATION]
         echo model_name = staka/fugumt-en-ja
-        echo device = cuda
+        echo device = %TORCH_DEVICE%
         echo max_length = 128
         echo.
         echo [LOGGING]
@@ -193,3 +197,5 @@ echo.
 echo Note: Allow access if Windows Firewall asks for permission
 echo Setup log saved: %SETUP_LOG%
 echo.
+echo Press any key to close this window...
+pause >nul
