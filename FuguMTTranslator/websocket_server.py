@@ -95,10 +95,14 @@ class WebSocketServer:
         finally:
             self.stop_server()
             
-    async def handle_client(self, websocket: WebSocketServerProtocol, path: str):
+    async def handle_client(self, websocket: WebSocketServerProtocol, path: str = None):
         """クライアント接続処理"""
         client_id = str(uuid.uuid4())
         client_address = websocket.remote_address
+        
+        # websockets 11.0以降ではpathが渡されない場合があるため、デフォルト値を設定
+        if path is None:
+            path = "/"
         
         self.logger.info(f"新しいクライアント接続: {client_id} from {client_address}")
         
