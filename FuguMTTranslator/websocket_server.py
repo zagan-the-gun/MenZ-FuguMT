@@ -164,6 +164,18 @@ class WebSocketServer:
         else:
             raise ValueError(f"サポートされていないリクエストタイプ: {request_type}")
             
+    def _normalize_language_code(self, lang_code: str) -> str:
+        """言語コードを正規化"""
+        # Unity側からの言語コードマッピング
+        lang_mapping = {
+            'jpn_jpan': 'ja',
+            'eng_latn': 'en'
+        }
+        
+        # 小文字に変換して正規化
+        normalized = lang_mapping.get(lang_code.lower(), lang_code.lower())
+        return normalized
+
     async def _handle_translation_request(self, websocket: WebSocketServerProtocol, client_id: str, data: Dict):
         """翻訳リクエスト処理"""
         request_id = data.get('request_id', str(uuid.uuid4()))
@@ -179,6 +191,11 @@ class WebSocketServer:
         source_lang = data.get('source_lang', 'en')
         target_lang = data.get('target_lang', 'ja')
         priority = data.get('priority', 'normal')
+        context_id = data.get('context_id', None)  # 話者ID
+        
+        # 言語コードを正規化
+        source_lang = self._normalize_language_code(source_lang)
+        target_lang = self._normalize_language_code(target_lang)
         
         # レスポンスキューの作成
         response_queue = Queue()
@@ -188,6 +205,7 @@ class WebSocketServer:
         request = {
             'id': request_id,
             'client_id': client_id,
+            'context_id': context_id,
             'type': 'translation',
             'text': text,
             'source_lang': source_lang,
@@ -204,6 +222,8 @@ class WebSocketServer:
         try:
             response = response_queue.get(timeout=self.config.timeout_seconds)
             response['request_id'] = request_id
+            if context_id:
+                response['context_id'] = context_id
             
             await websocket.send(json.dumps(response, ensure_ascii=False))
             
@@ -213,6 +233,8 @@ class WebSocketServer:
                 'error': f'リクエストタイムアウト ({self.config.timeout_seconds}秒)',
                 'status': 'timeout'
             }
+            if context_id:
+                timeout_response['context_id'] = context_id
             await websocket.send(json.dumps(timeout_response, ensure_ascii=False))
             
         finally:
