@@ -78,14 +78,14 @@ echo.
 
 echo [4/6] Installing dependencies...
 echo [INFO] This may take several minutes...
-python -m pip install --upgrade pip setuptools wheel
+powershell -NoProfile -ExecutionPolicy Bypass -Command "python -m pip install --upgrade pip setuptools wheel 2^>^&1 ^| Tee-Object -FilePath '%SETUP_LOG%' -Append; exit $LASTEXITCODE"
 if %errorlevel% neq 0 (
     echo [WARNING] Failed to upgrade pip, continuing with current version...
 )
 
 echo Installing dependencies...
 echo [STEP] Installing dependencies from requirements.txt... >> %SETUP_LOG%
-pip install -r requirements.txt >> %SETUP_LOG% 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -Command "pip install -r 'requirements.txt' 2^>^&1 ^| Tee-Object -FilePath '%SETUP_LOG%' -Append; exit $LASTEXITCODE"
 if errorlevel 1 (
     echo [ERROR] Failed to install dependencies.
     echo [ERROR] Dependencies installation failed >> %SETUP_LOG%
@@ -103,9 +103,10 @@ set /p GPU="Choice: "
 echo [INPUT] User selected: %GPU% >> %SETUP_LOG%
 
 if /i "%GPU%"=="y" (
-    echo Installing PyTorch with CUDA...
-    echo [STEP] Installing PyTorch CUDA version... >> %SETUP_LOG%
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128 --force-reinstall >> %SETUP_LOG% 2>&1
+    echo Installing PyTorch with CUDA (this may take several minutes)...
+    echo [STEP] Installing PyTorch CUDA version (2.2.2 cu121)... >> %SETUP_LOG%
+    rem Pin versions to avoid resolver hang and ensure compatibility
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --index-url https://download.pytorch.org/whl/cu121 --force-reinstall 2^>^&1 ^| Tee-Object -FilePath '%SETUP_LOG%' -Append; exit $LASTEXITCODE"
     if errorlevel 1 (
         echo [ERROR] Failed to install PyTorch.
         echo [ERROR] PyTorch installation failed >> %SETUP_LOG%
@@ -116,9 +117,10 @@ if /i "%GPU%"=="y" (
     echo [SUCCESS] PyTorch CUDA version installed >> %SETUP_LOG%
     echo [SUCCESS] PyTorch CUDA version installed
 ) else (
-    echo Installing PyTorch CPU version...
-    echo [STEP] Installing PyTorch CPU version... >> %SETUP_LOG%
-    pip install torch torchvision torchaudio --force-reinstall >> %SETUP_LOG% 2>&1
+    echo Installing PyTorch CPU version (this may take several minutes)...
+    echo [STEP] Installing PyTorch CPU version (2.2.2)... >> %SETUP_LOG%
+    rem Pin versions for consistency with CUDA path
+    powershell -NoProfile -ExecutionPolicy Bypass -Command "pip install torch==2.2.2 torchvision==0.17.2 torchaudio==2.2.2 --force-reinstall 2^>^&1 ^| Tee-Object -FilePath '%SETUP_LOG%' -Append; exit $LASTEXITCODE"
     if errorlevel 1 (
         echo [ERROR] Failed to install PyTorch CPU version.
         echo [ERROR] PyTorch installation failed >> %SETUP_LOG%
