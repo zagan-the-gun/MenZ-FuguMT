@@ -246,6 +246,16 @@ class FuguMTTranslator:
                 self.stats['total_tokens'] += len(inputs['input_ids'][0])
                 self.stats['total_time'] += processing_time
                 
+            # 翻訳前後テキストをログ出力
+            self.logger.info(
+                "翻訳完了 [%s->%s] %.1f ms\n  原文: %s\n  訳文: %s",
+                source_lang,
+                target_lang,
+                processing_time * 1000,
+                text,
+                translated_text,
+            )
+
             return {
                 'translated_text': translated_text,
                 'source_text': text,
