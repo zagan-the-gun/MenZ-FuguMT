@@ -14,6 +14,10 @@ echo FuguMT Translation Server - Starting...
 echo ======================================================
 echo.
 
+REM Ensure we execute from the script's directory (handles Unity launch from other working dirs)
+cd /d "%~dp0"
+echo [DEBUG] Normalized working directory to: %CD%
+
 :: Test basic functionality first
 echo [DEBUG] Testing basic Windows commands...
 dir >nul 2>&1

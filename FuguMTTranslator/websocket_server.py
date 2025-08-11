@@ -221,11 +221,18 @@ class WebSocketServer:
         # レスポンス待機
         try:
             response = response_queue.get(timeout=self.config.timeout_seconds)
-            response['request_id'] = request_id
-            if context_id:
-                response['context_id'] = context_id
-            
-            await websocket.send(json.dumps(response, ensure_ascii=False))
+
+            # クライアント向けレスポンスに正規化（キー名とステータス）
+            status_value = 'completed' if response.get('status') == 'success' else response.get('status', 'error')
+            client_response = {
+                'request_id': request_id,
+                'status': status_value,
+                'translated': response.get('translated', response.get('translated_text', '')),
+                'processing_time_ms': response.get('processing_time_ms', 0),
+                'context_id': context_id or ''
+            }
+
+            await websocket.send(json.dumps(client_response, ensure_ascii=False))
             
         except Empty:
             timeout_response = {

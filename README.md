@@ -162,12 +162,13 @@ const ws = new WebSocket('ws://127.0.0.1:55002');
 ```json
 {
     "request_id": "unique-request-id",
-    "translated_text": "こんにちは、元気ですか？",
+    "translated": "こんにちは、元気ですか？",
     "source_text": "Hello, how are you?",
     "source_lang": "en",
     "target_lang": "ja",
     "processing_time_ms": 250.5,
-    "status": "success"
+    "status": "completed",
+    "context_id": "speaker-1"
 }
 ```
 
@@ -240,7 +241,7 @@ public class FuguMTClient : MonoBehaviour
     private void OnMessage(object sender, MessageEventArgs e)
     {
         var response = JsonUtility.FromJson<TranslationResponse>(e.Data);
-        Debug.Log($"翻訳結果: {response.translated_text}");
+        Debug.Log($"翻訳結果: {response.translated}");
     }
 }
 
@@ -248,7 +249,7 @@ public class FuguMTClient : MonoBehaviour
 public class TranslationResponse
 {
     public string request_id;
-    public string translated_text;
+    public string translated;
     public string status;
 }
 ```
@@ -275,7 +276,7 @@ async def translate_text(text, source_lang="en", target_lang="ja"):
         response = await websocket.recv()
         result = json.loads(response)
         
-        return result["translated_text"]
+return result["translated"]
 
 # 使用例
 async def main():
