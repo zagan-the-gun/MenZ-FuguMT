@@ -12,6 +12,8 @@ echo "🚀 FuguMT翻訳サーバー セットアップ"
 echo "=========================================="
 echo
 
+## CPU前提でセットアップ（GPU選択は行わない）
+
 # Python確認
 echo "🔍 Python環境を確認中..."
 if ! command -v python3 &> /dev/null; then
@@ -72,6 +74,8 @@ echo "📦 pipをアップグレード中..."
 python -m pip install --upgrade pip setuptools wheel
 echo
 
+echo "🎛  GPUモード: cpu (固定)"
+
 # OS判定とGPU環境確認
 echo "🖥️  システム情報:"
 uname -a
@@ -107,6 +111,9 @@ fi
 echo
 echo "✅ セットアップが完了しました！"
 echo
+
+## CUDA版のインストールは行いません（CPU前提）
+
 echo "次のステップ:"
 echo "  1. ./run.sh を実行してサーバーを起動"
 echo "  2. Webブラウザで ws://127.0.0.1:55002 に接続"

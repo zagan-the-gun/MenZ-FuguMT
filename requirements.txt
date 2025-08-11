@@ -1,10 +1,13 @@
 # FuguMT翻訳サーバー 依存関係
 
 # 深層学習フレームワーク
-# PyTorch (GPU/CPU はsetup.batで選択)
-# torch, torchvision, torchaudio は setup.bat で自動インストール
+# PyTorch（mac/Linux/CPU想定。WindowsでGPUを使う場合は各自CUDA版に置き換えてください）
+torch==2.2.2
 
-transformers>=4.21.0
+# Zenn記事で報告の互換性問題回避のため固定
+# https://zenn.dev/inaturam/articles/fb99d04887f8dc
+transformers==4.31.0
+tokenizers==0.13.3
 
 # WebSocket通信
 websockets>=10.3
@@ -25,7 +28,7 @@ websockets>=10.3
 typing-extensions>=4.0.0
 
 # トークナイザー関連
-sentencepiece>=0.1.95
+sentencepiece==0.1.99
 protobuf>=3.20.0
 sacremoses>=0.0.43
 
