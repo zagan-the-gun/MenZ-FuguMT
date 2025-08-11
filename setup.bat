@@ -45,13 +45,8 @@ echo.
 echo [2/6] Creating virtual environment...
 echo [STEP] Creating virtual environment... >> %SETUP_LOG%
 if exist venv (
-    echo [INFO] Existing virtual environment found. Recreate? ^(y/N^)
-    set /p recreate=
-    if /i "!recreate!"=="y" (
-        echo [INFO] Removing existing virtual environment...
-        echo [STEP] Removing existing venv... >> %SETUP_LOG%
-        rmdir /s /q venv
-    )
+    echo [INFO] Existing virtual environment found. Using existing venv.
+    echo [INFO] Reusing existing virtual environment >> %SETUP_LOG%
 )
 
 if not exist venv (
